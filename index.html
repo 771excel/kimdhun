@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시그니처 단가 리스트</title>
-    <!-- Font Awesome 아이콘 사용을 위한 CDN 연결 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>771 시그니처 리스트</title>
     
     <style>
         /* Google Fonts에서 'Noto Sans KR' 폰트 가져오기 */
@@ -19,7 +17,7 @@
 
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
             display: flex;
             justify-content: center;
             align-items: flex-start; /* 상단 정렬 */
@@ -30,18 +28,27 @@
         .container {
             background-color: #fff;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             width: 90%;
             max-width: 600px;
             text-align: center;
             position: relative;
         }
         
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 150px;
+            height: auto;
+        }
+        
         h1 {
             color: #333;
             margin-bottom: 20px;
-            font-size: 2.5em;
+            font-size: 2.2em;
             font-weight: 700;
         }
 
@@ -62,17 +69,19 @@
             color: #495057;
             cursor: pointer;
             font-size: 0.9em;
-            transition: background-color 0.2s, color 0.2s;
+            transition: all 0.2s ease-in-out;
         }
 
         .filter-btn:hover {
             background-color: #e9ecef;
+            transform: translateY(-2px);
         }
 
         .filter-btn.active {
             background-color: #007bff;
             color: white;
             border-color: #007bff;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
         }
         
         #search-input {
@@ -83,42 +92,73 @@
             font-size: 1em;
             margin-bottom: 20px;
             font-family: 'Noto Sans KR', sans-serif;
+            transition: border-color 0.2s;
+        }
+        #search-input:focus {
+            border-color: #007bff;
+            outline: none;
         }
 
         #dance-list { 
             list-style-type: none; 
             text-align: left; 
             max-height: 50vh; /* 화면 높이에 따라 조절 */
-            overflow-y: auto; 
+            overflow-y: auto;
+            padding-right: 10px; /* 스크롤바 공간 확보 */
+        }
+        /* 스크롤바 디자인 */
+        #dance-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #dance-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        #dance-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        #dance-list::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
         }
 
+
         #dance-list li {
-            background-color: #f1f3f5;
+            background-color: #fff;
             padding: 15px;
             margin-bottom: 10px;
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1.1em;
-            transition: background-color 0.3s;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #f1f3f5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        #dance-list li:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .dance-info { flex-grow: 1; margin-right: 10px; text-align: left; }
         .dance-info .name { font-weight: 700; color: #343a40; }
-        .dance-info .price { color: #868e96; margin-left: 10px; }
+        .dance-info .price { color: #007bff; font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logo-container">
+            <img src="http://googleusercontent.com/file_content/3" alt="771 로고">
+        </div>
         <h1>771 시그니처 단가</h1>
         
         <div id="filter-buttons">
             <button class="filter-btn active" data-min="0" data-max="Infinity">전체</button>
-            <button class="filter-btn" data-min="1" data-max="999">~ 999</button>
-            <button class="filter-btn" data-min="1001" data-max="4999">1001 ~ 4999</button>
-            <button class="filter-btn" data-min="5000" data-max="9999">5000 ~ 9999</button>
-            <button class="filter-btn" data-min="10000" data-max="Infinity">10000 ~</button>
+            <button class="filter-btn" data-min="1" data-max="999">~ 999개</button>
+            <button class="filter-btn" data-min="1000" data-max="4999">1000 ~ 4999개</button>
+            <button class="filter-btn" data-min="5000" data-max="9999">5000 ~ 9999개</button>
+            <button class="filter-btn" data-min="10000" data-max="Infinity">10000개 ~</button>
         </div>
         
         <input type="text" id="search-input" placeholder="시그 이름 또는 단가로 검색...">
