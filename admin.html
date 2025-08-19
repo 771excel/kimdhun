@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시그니처 관리</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        :root {
+            --primary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --light-gray: #f4f7f9;
+            --gray: #dfe6e9;
+            --dark-gray: #576574;
+            --text-color: #2c3e50;
+        }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--light-gray); display: flex; justify-content: center; padding: 20px; }
+        .container { background-color: #fff; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 90%; max-width: 800px; }
+        h1, h2 { margin-bottom: 20px; text-align: center; color: var(--text-color); }
+        h2 { font-size: 1.5em; }
+        #password-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 100; }
+        #password-box { background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #password-box input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin: 10px 0; }
+        #password-box button { padding: 10px 20px; }
+        #admin-content { display: none; }
+        .item-list { max-height: 40vh; overflow-y: auto; padding: 10px; border: 1px solid var(--gray); border-radius: 8px; margin-bottom: 20px; }
+        .sig-item, .person-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; padding: 5px; border-radius: 5px; background-color: #fff; }
+        .person-item { cursor: grab; }
+        .person-item.dragging { opacity: 0.5; background-color: #eaf5ff; }
+        .sig-item input, .sig-item select, .person-item input { padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 1em; }
+        .sig-item input[type="text"], .person-item input[type="text"] { flex-grow: 1; }
+        .sig-item input[type="number"] { width: 100px; }
+        .sig-item select { width: 150px; }
+        .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; color: white; transition: background-color 0.2s; }
+        .delete-btn { background-color: var(--danger-color); }
+        .delete-btn:hover { background-color: #c0392b; }
+        .add-form { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; display: flex; gap: 10px; }
+        .save-btn { background-color: var(--success-color); font-size: 1.1em; padding: 12px; width: 100%; margin-top: 10px; }
+        .save-btn:hover { background-color: #2ecc71; }
+        .home-link { display: block; margin-top: 20px; text-align: center; }
+        .management-section { margin-top: 30px; padding: 20px; border: 1px solid var(--gray); border-radius: 12px; }
+        #notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--success-color); color: white; padding: 15px 25px; border-radius: 8px; z-index: 200; opacity: 0; transition: opacity 0.5s; }
+        #notification.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div id="password-overlay">
+        <div id="password-box">
+            <h2>관리자 비밀번호</h2>
+            <input type="password" id="password-input">
+            <button id="password-submit" class="btn" style="background-color: var(--primary-color);">로그인</button>
+        </div>
+    </div>
+
+    <div class="container" id="admin-content">
+        <h1>시그니처 관리</h1>
+        
+        <div class="management-section">
+            <h2>시그니처 목록</h2>
+            <div class="add-form">
+                <input type="text" id="new-name" placeholder="새 시그니처 이름">
+                <input type="number" id="new-price" placeholder="단가">
+                <select id="new-person"></select>
+                <button id="add-btn" class="btn" style="background-color:var(--primary-color);">추가</button>
+            </div>
+            <div id="admin-list" class="item-list"></div>
+            <button id="save-dances-btn" class="btn save-btn">시그니처 목록 저장</button>
+        </div>
+
+        <div class="management-section">
+            <h2>멤버 관리</h2>
+            <div class="add-form">
+                <input type="text" id="new-person-name" placeholder="새 멤버 이름">
+                <button id="add-person-btn" class="btn" style="background-color:var(--primary-color);">멤버 추가</button>
+            </div>
+            <div id="person-list" class="item-list"></div>
+            <button id="save-people-btn" class="btn save-btn">멤버 목록 저장</button>
+        </div>
+
+        <a href="index.html" class="home-link">목록 페이지로 돌아가기</a>
+    </div>
+    <div id="notification"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordOverlay = document.getElementById('password-overlay');
+            const passwordInput = document.getElementById('password-input');
+            const passwordSubmit = document.getElementById('password-submit');
+            const adminContent = document.getElementById('admin-content');
+            const adminList = document.getElementById('admin-list');
+            const newNameInput = document.getElementById('new-name');
+            const newPriceInput = document.getElementById('new-price');
+            const newPersonSelect = document.getElementById('new-person');
+            const addBtn = document.getElementById('add-btn');
+            const saveDancesBtn = document.getElementById('save-dances-btn');
+            const personList = document.getElementById('person-list');
+            const newPersonNameInput = document.getElementById('new-person-name');
+            const addPersonBtn = document.getElementById('add-person-btn');
+            const savePeopleBtn = document.getElementById('save-people-btn');
+            const notification = document.getElementById('notification');
+
+            const ENCRYPTED_PASSWORD = "NzcxNzcx";
+            let dances = [];
+            let people = [];
+
+            const defaultPeople = [ '채보미', '예란', '미래', '푸글리', '유나연', '파닥', '짐광환', '한여름', '이리원', '촉촉꼬앙', '이아린', '김대봉', '기타' ];
+            
+            const personalFilters = {
+                '채보미': ['봄뾱단', '보미 온다면', '보미차이', '채봄미워', 'Thumb', 'You are my Hero', '슈퍼봄플단', '채플단 Never Die'],
+                '예란': ['란뾱이', '요괴란', '예란 응원가', '예란 신호탄', '슈퍼란플단', '행복만해란'],
+                '미래': ['미래베어', '미뾱단', '미래 응원가', '미래의호흡', '미플단업', '미래가 미래다', '미래 더 알고싶어', '슈퍼 미플단', '미래핵펀치'],
+                '푸글리': ['글리 응원가', '섹시글리', '글리 신호탄', '슈퍼 푸글리'],
+                '유나연': ['나연 응원가', '수어사이드', '나연 신호탄', '슈퍼유플단'],
+                '파닥': ['파닥 응원가', '두고 보닥', '이리오너라', '파닥 신호탄', '닥이 좀보자', '파닥몬 진화', '슈퍼 닥플단'],
+                '짐광환': ['언홀리', '미친짐광', '우리짐광'],
+                '한여름': ['썸뾱단', '여르미텐겐', 'Summer Aria', '썸신호탄', '슈퍼 썸플단'],
+                '이리원': ['아리원', '이리원이리온', '슈퍼 원플단'],
+                '촉촉꼬앙': ['=^꼬앙이^=', '앙뾱단', 'Go 꼬앙', '무적꼬앙', '슈퍼 촉촉단'],
+                '이아린': ['Outta my mind', '이쁜아린', '이아린업', '린플단 너와나사이', '아린 신호탄', '슈퍼 린플단'],
+                '김대봉': ['대봉 응원가', '대봉신호탄']
+            };
+
+            const sigToPersonMap = {};
+            for (const person in personalFilters) {
+                personalFilters[person].forEach(sig => {
+                    sigToPersonMap[sig] = person;
+                });
+            }
+
+            const allDancesData = [
+                { name: '함사울래', price: 771 }, { name: '햄토리', price: 852 }, { name: '오로나민씨', price: 940 }, { name: '괜찮아딩딩딩', price: 945 }, { name: '진짜배기', price: 988 }, { name: '비둘기', price: 999 }, { name: '훈두렁1', price: 1000 }, { name: '납작가슴', price: 1001 }, { name: '실루엣', price: 1002 }, { name: '솜사탕', price: 1003 }, { name: '슈퍼그럼요', price: 1005 }, { name: '탕탕탕', price: 1008 }, { name: '역도', price: 1009 }, { name: '미룬이', price: 1010 }, { name: '진압해', price: 1011 }, { name: '피리아웃송', price: 1012 }, { name: '이라이라', price: 1025 }, { name: '모찌송', price: 1052 }, { name: '삐끼삐끼', price: 1080 }, { name: '허리업', price: 1082 }, { name: '미래베어', price: 1087 }, { name: '썸뾱단', price: 1088 }, { name: '꼬앙이', price: 1092 }, { name: '첫만남', price: 1102 }, { name: '못말리는아가씨', price: 1111 }, { name: '바빠', price: 1115 }, { name: '컴투미', price: 1122 }, { name: '버터플라이', price: 1142 }, { name: '말해줘요', price: 1152 }, { name: '러브쉐이크', price: 1182 }, { name: '헤비머신건', price: 1212 }, { name: '레디올낫', price: 1252 }, { name: '이즈나 IZNA', price: 1279 }, { name: '핫해', price: 1288 }, { name: '테디베어', price: 1295 }, { name: '골반댄스', price: 1297 }, { name: '겐또', price: 1298 }, { name: '카리나닮았대', price: 1299 }, { name: '탕후루', price: 1300 }, { name: '바람피면D지는거야', price: 1310 }, { name: '할말이없네', price: 1313 }, { name: '푱푱', price: 1350 }, { name: '포켓몬', price: 1360 }, { name: '룩앳미', price: 1370 }, { name: '폼미쳤다', price: 1400 }, { name: 'KTwiz 아웃송', price: 1412 }, { name: 'Shhhh', price: 1425 }, { name: '슈퍼슈퍼해', price: 1444 }, { name: '홀드업', price: 1450 }, { name: '봄뾱단', price: 1452 }, { name: '오늘만 I love you', price: 1486 }, { name: '미뾱단', price: 1487 }, { name: '앙뾱단', price: 1492 }, { name: '왜요왜요', price: 1500 }, { name: '사랑받을준비완료', price: 1520 }, { name: '란뾱이', price: 1524 }, { name: '벌룬인럽', price: 1550 }, { name: '나랑사귈래', price: 1570 }, { name: '마그네틱', price: 1580 }, { name: '사랑스러워', price: 1599 }, { name: 'Apt', price: 1600 }, { name: '아마겟돈', price: 1650 }, { name: '오빠달려붕붕', price: 1665 }, { name: '기훈업(호영레이블)', price: 1666 }, { name: '여르미텐겐', price: 1688 }, { name: '짠쿵쾅', price: 1700 }, { name: '이머전시', price: 1705 }, { name: '외모체크', price: 1717 }, { name: '클락션', price: 1750 }, { name: '돈터치', price: 1771 }, { name: '미드차이', price: 1772 }, { name: '꽃게춤', price: 1777 }, { name: '스트로베리러쉬', price: 1800 }, { name: '우치다', price: 1802 }, { name: '퉁퉁퉁사후르', price: 1805 }, { name: '날라리', price: 1818 }, { name: '나이스바디', price: 1820 }, { name: '아리원', price: 1821 }, { name: '옴브리뉴', price: 1850 }, { name: '너뿐이야', price: 1852 }, { name: '수파도파', price: 1888 }, { name: '푸른산호초', price: 1919 }, { name: '포켓로켓', price: 1925 }, { name: '슈퍼스타', price: 1950 }, { name: '찔려', price: 1972 }, { name: '첫눈', price: 1980 }, { name: '청바지', price: 1999 }, { name: '훈두렁', price: 2000 }, { name: '빛을따라서', price: 2002 }, { name: '투배드', price: 2004 }, { name: '킥드베', price: 2005 }, { name: '체온', price: 2008 }, { name: '붐붐베이스', price: 2010 }, { name: 'Outta my mind', price: 2025 }, { name: '몸', price: 2030 }, { name: '바니바니', price: 2050 }, { name: '팬서비스', price: 2060 }, { name: '나니가스키', price: 2070 }, { name: '내이름 맑음', price: 2080 }, { name: '키딩', price: 2099 }, { name: '슈퍼소닉', price: 2100 }, { name: '나루토', price: 2111 }, { name: '아로아로', price: 2152 }, { name: '이 xxx야', price: 2180 }, { name: '최애의 아이', price: 2200 }, { name: '사쿠란보', price: 2201 }, { name: '제로투', price: 2222 }, { name: '바우치', price: 2223 }, { name: '요괴란', price: 2224 }, { name: '네모네모', price: 2225 }, { name: '사뿐사뿐', price: 2226 }, { name: '드립', price: 2300 }, { name: '할것', price: 2333 }, { name: '언홀리', price: 2345 }, { name: '고민중독', price: 2350 }, { name: '떡춤', price: 2400 }, { name: '콩콩이', price: 2401 }, { name: '테크토닉', price: 2402 }, { name: '더기춤', price: 2403 }, { name: '04년생 클럽춤', price: 2404 }, { name: '내귀에캔디', price: 2424 }, { name: '틱탁', price: 2444 }, { name: 'Up', price: 2450 }, { name: '대봉 응원가', price: 2452 }, { name: '파닥 응원가', price: 2484 }, { name: '핑크 레이디', price: 2500 }, { name: '멋쟁이 토마토', price: 2505 }, { name: '소다팝', price: 2548 }, { name: '오빠 바이러스', price: 2550 }, { name: 'Work', price: 2555 }, { name: '자기야 화풀어', price: 2558 }, { name: '위플래쉬', price: 2600 }, { name: '우유', price: 2626 }, { name: '너와의 모든지금', price: 2670 }, { name: '만트라', price: 2700 }, { name: '여우', price: 2727 }, { name: '흔들어!', price: 2771 }, { name: '매니악', price: 2777 }, { name: '미친짐광', price: 2779 }, { name: '바디바디', price: 2800 }, { name: '이쁜아린', price: 2802 }, { name: '천사소개', price: 2804 }, { name: '공주들은 원래그래', price: 2820 }, { name: '이리원이리온', price: 2821 }, { name: '간바레센빠이', price: 2828 }, { name: '나연 응원가', price: 2846 }, { name: '보미 온다면', price: 2852 }, { name: '미래 응원가', price: 2887 }, { name: 'Like you', price: 2888 }, { name: '글리 응원가', price: 2892 }, { name: '미야오', price: 2900 }, { name: '화사 Na', price: 2950 }, { name: '두고 보닥', price: 2984 }, { name: '코카인', price: 2992 }, { name: '훈두렁 3', price: 3000 }, { name: 'EDM', price: 3003 }, { name: 'Wicked', price: 3025 }, { name: 'GGUM', price: 3030 }, { name: 'Not Like Us', price: 3066 }, { name: '이리오너라', price: 3084 }, { name: '미래의호흡', price: 3087 }, { name: 'Go 꼬앙', price: 3092 }, { name: '손떼!!', price: 3111 }, { name: '예란 응원가', price: 3124 }, { name: '버러지송', price: 3180 }, { name: 'LSD', price: 3222 }, { name: 'Summer Aria', price: 3288 }, { name: '밤을 달리다', price: 3300 }, { name: '이아린업', price: 3302 }, { name: '수어사이드', price: 3333 }, { name: '섹시글리', price: 3392 }, { name: '그대에게 한마디', price: 3500 }, { name: '이쿠욧', price: 3555 }, { name: '알려줄게', price: 3669 }, { name: '아헤가오', price: 3777 }, { name: '빠라뉴', price: 3888 }, { name: '터미널', price: 3892 }, { name: '섹시 빠빠빠', price: 3988 }, { name: '훈두렁 4', price: 4000 }, { name: 'Angel', price: 4001 }, { name: '린플단 너와나사이', price: 4202 }, { name: 'Levitating', price: 4400 }, { name: '완전히 살아있네', price: 4444 }, { name: '미플단업', price: 4487 }, { name: '무적꼬앙', price: 4492 }, { name: 'London', price: 4555 }, { name: '나연 신호탄', price: 4646 }, { name: '따보던지', price: 4848 }, { name: '파닥 신호탄', price: 4884 }, { name: 'RARARA', price: 4892 }, { name: '최악의세대', price: 5000 }, { name: '헤이미키', price: 5050 }, { name: '예란 신호탄', price: 5124 }, { name: '대봉신호탄', price: 5252 }, { name: '보미차이', price: 5272 }, { name: '우리짐광', price: 5279 }, { name: '미래가 미래다', price: 5287 }, { name: '썸신호탄', price: 5288 }, { name: '아린 신호탄', price: 5502 }, { name: 'Beggin', price: 5555 }, { name: '글리 신호탄', price: 5792 }, { name: '닥이 좀보자', price: 5884 }, { name: '사쿠라', price: 5959 }, { name: '호세쿠엘보', price: 6000 }, { name: '슬램덩크', price: 6666 }, { name: 'Ashes', price: 6767 }, { name: '캐리비안의 해적', price: 6868 }, { name: '문라이트', price: 6969 }, { name: 'Got It', price: 6974 }, { name: '훈두렁 7', price: 7000 }, { name: '채봄미워', price: 7525 }, { name: '귀환', price: 7575 }, { name: 'Killer', price: 7666 }, { name: '쇼타임', price: 7777 }, { name: '거짓말', price: 8000 }, { name: '이게바로 멋인기라', price: 8337 }, { name: '살아있네 살아있어', price: 8484 }, { name: '미래 더 알고싶어', price: 8787 }, { name: '빠빠빠', price: 8888 }, { name: '레전드 네버다이', price: 9000 }, { name: '계엄령', price: 9500 }, { name: '파이널 러브송', price: 9820 }, { name: '슈퍼 비둘기', price: 9999 }, { name: 'MVP', price: 10000 }, { name: '질풍가도', price: 10002 }, { name: '사케사랑', price: 10004 }, { name: 'Where you are', price: 10010 }, { name: 'Devil', price: 10013 }, { name: '홍길동', price: 10020 }, { name: '슈퍼란플단', price: 10024 }, { name: 'Ak47', price: 10047 }, { name: 'Thumb', price: 10052 }, { name: 'V6_melody', price: 10066 }, { name: 'The', price: 10071 }, { name: '하누 HANU', price: 10082 }, { name: '파닥몬 진화', price: 10084 }, { name: '보미안의88', price: 10088 }, { name: '슈퍼 촉촉단', price: 10092 }, { name: '만개화', price: 10099 }, { name: 'You are my Hero', price: 10105 }, { name: '동쟈스님', price: 10108 }, { name: '슈퍼유플단', price: 10146 }, { name: '공돌2당', price: 10202 }, { name: 'Dodododod', price: 10505 }, { name: '대치동', price: 10609 }, { name: '땡기우기', price: 10707 }, { name: '찌노롱UP', price: 10756 }, { name: '만끼', price: 10771 }, { name: '지져스', price: 10774 }, { name: 'Carrera.', price: 10911 }, { name: 'Heaven', price: 11004 }, { name: 'Atmosphere', price: 11111 }, { name: '강강수월래', price: 11187 }, { name: '도파민', price: 11582 }, { name: '슈퍼 썸플단', price: 12088 }, { name: 'Hands Up', price: 12121 }, { name: '심장을 바쳐라', price: 12171 }, { name: '슈퍼 원플단', price: 12221 }, { name: '시그니엘', price: 12223 }, { name: 'Ass Up', price: 12250 }, { name: '안녕하세욥@', price: 12345 }, { name: '슈퍼봄플단', price: 12452 }, { name: '발견사운드', price: 12484 }, { name: 'Heart', price: 12486 }, { name: '슈퍼 푸글리', price: 12492 }, { name: '레부엘토마토', price: 12505 }, { name: '아뜨거탱탱이', price: 12525 }, { name: '어흥~!@', price: 12550 }, { name: '함마형!', price: 12588 }, { name: 'Cjyo', price: 12745 }, { name: 'Ignite', price: 13333 }, { name: '슈퍼 린플단', price: 14202 }, { name: '행복만해란', price: 14240 }, { name: '슈퍼 닥플단', price: 14484 }, { name: '슈퍼 미플단', price: 14487 }, { name: 'Wolves', price: 14771 }, { name: '마티니', price: 15000 }, { name: 'Dangerous', price: 16666 }, { name: '고죠사토루', price: 17459 }, { name: '#까치', price: 17777 }, { name: '프로산게장', price: 18530 }, { name: 'VIP', price: 20000 }, { name: '이만 끼', price: 20771 }, { name: '할렐루야', price: 20774 }, { name: '채플단 Never Die', price: 22222 }, { name: 'Chocoping', price: 25555 }, { name: '귀멸의 칼날', price: 27771 }, { name: '큰 까치', price: 27777 }, { name: '미래핵펀치', price: 28787 }, { name: '큰 레부엘토마토', price: 29999 }, { name: 'VVIP', price: 30000 }, { name: 'Legendary', price: 100000 }, { name: 'Stronger', price: 200000 }, { name: 'GOD', price: 300000 }
+            ].map(dance => ({...dance, person: sigToPersonMap[dance.name] || '기타'}));
+
+
+            function showNotification(message) {
+                notification.textContent = message;
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            }
+
+            function populateSelect(selectElement, selectedValue) {
+                selectElement.innerHTML = '';
+                people.forEach(person => {
+                    const option = document.createElement('option');
+                    option.value = person;
+                    option.textContent = person;
+                    if (person === selectedValue) {
+                        option.selected = true;
+                    }
+                    selectElement.appendChild(option);
+                });
+            }
+
+            function loadData() {
+                const savedDances = localStorage.getItem('signatureDances');
+                dances = savedDances ? JSON.parse(savedDances) : [...defaultDances];
+                const savedPeople = localStorage.getItem('signaturePeople');
+                people = savedPeople ? JSON.parse(savedPeople) : [...defaultPeople];
+            }
+
+            function renderAdminList() {
+                adminList.innerHTML = '';
+                dances.forEach((dance, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'sig-item';
+                    
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.value = dance.name;
+                    nameInput.className = 'sig-item-name';
+
+                    const priceInput = document.createElement('input');
+                    priceInput.type = 'number';
+                    priceInput.value = dance.price;
+                    priceInput.className = 'sig-item-price';
+
+                    const personSelect = document.createElement('select');
+                    personSelect.className = 'sig-item-person';
+                    populateSelect(personSelect, dance.person || '기타');
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteBtn.className = 'btn delete-btn';
+                    deleteBtn.addEventListener('click', () => {
+                        dances.splice(index, 1);
+                        renderAdminList();
+                    });
+
+                    item.appendChild(nameInput);
+                    item.appendChild(priceInput);
+                    item.appendChild(personSelect);
+                    item.appendChild(deleteBtn);
+                    adminList.appendChild(item);
+                });
+            }
+
+            function renderPeopleList() {
+                personList.innerHTML = '';
+                people.forEach((person, index) => {
+                    if (person === '기타') return; 
+                    const item = document.createElement('div');
+                    item.className = 'person-item';
+                    item.draggable = true;
+                    item.dataset.index = index;
+                    
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.value = person;
+                    nameInput.className = 'person-item-name';
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteBtn.className = 'btn delete-btn';
+                    deleteBtn.addEventListener('click', () => {
+                        const personNameToDelete = people[index];
+                        people.splice(index, 1);
+                        dances.forEach(dance => {
+                            if (dance.person === personNameToDelete) {
+                                dance.person = '기타';
+                            }
+                        });
+                        renderPeopleList();
+                        populateSelect(newPersonSelect, '기타');
+                        renderAdminList();
+                    });
+
+                    item.appendChild(nameInput);
+                    item.appendChild(deleteBtn);
+                    personList.appendChild(item);
+                });
+
+                addDragAndDropHandlers();
+            }
+
+            function addDragAndDropHandlers() {
+                const items = personList.querySelectorAll('.person-item');
+                let draggedItem = null;
+
+                items.forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        draggedItem = item;
+                        setTimeout(() => item.classList.add('dragging'), 0);
+                    });
+
+                    item.addEventListener('dragend', () => {
+                        draggedItem.classList.remove('dragging');
+                        draggedItem = null;
+                    });
+
+                    item.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        const afterElement = getDragAfterElement(personList, e.clientY);
+                        if (afterElement == null) {
+                            personList.appendChild(draggedItem);
+                        } else {
+                            personList.insertBefore(draggedItem, afterElement);
+                        }
+                    });
+                });
+            }
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.person-item:not(.dragging)')];
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            function saveDances() {
+                const newDances = [];
+                const items = adminList.querySelectorAll('.sig-item');
+                items.forEach(item => {
+                    const name = item.querySelector('.sig-item-name').value.trim();
+                    const price = parseInt(item.querySelector('.sig-item-price').value, 10);
+                    const person = item.querySelector('.sig-item-person').value;
+                    if (name && !isNaN(price)) {
+                        newDances.push({ name, price, person });
+                    }
+                });
+                dances = newDances;
+                dances.sort((a, b) => a.price - b.price);
+                localStorage.setItem('signatureDances', JSON.stringify(dances));
+                showNotification('시그니처 목록이 저장되었습니다!');
+                renderAdminList();
+            }
+
+            function savePeople() {
+                const newPeople = [];
+                const personItems = personList.querySelectorAll('.person-item-name');
+                personItems.forEach(item => {
+                    const name = item.value.trim();
+                    if (name) newPeople.push(name);
+                });
+                people = [...newPeople, '기타'];
+                localStorage.setItem('signaturePeople', JSON.stringify(people));
+                showNotification('멤버 목록이 저장되었습니다!');
+                renderPeopleList();
+                populateSelect(newPersonSelect, '기타');
+                renderAdminList();
+            }
+
+            passwordSubmit.addEventListener('click', () => {
+                if (btoa(passwordInput.value) === ENCRYPTED_PASSWORD) {
+                    passwordOverlay.style.display = 'none';
+                    adminContent.style.display = 'block';
+                    loadData();
+                    dances.sort((a, b) => a.price - b.price);
+                    populateSelect(newPersonSelect, '기타');
+                    renderAdminList();
+                    renderPeopleList();
+                } else {
+                    alert('비밀번호가 틀렸습니다.');
+                }
+            });
+             passwordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    passwordSubmit.click();
+                }
+            });
+
+            addBtn.addEventListener('click', () => {
+                const name = newNameInput.value.trim();
+                const price = parseInt(newPriceInput.value, 10);
+                const person = newPersonSelect.value;
+                if (name && !isNaN(price)) {
+                    dances.push({ name, price, person });
+                    dances.sort((a, b) => a.price - b.price);
+                    newNameInput.value = '';
+                    newPriceInput.value = '';
+                    renderAdminList();
+                } else {
+                    alert('이름과 단가를 올바르게 입력해주세요.');
+                }
+            });
+
+            addPersonBtn.addEventListener('click', () => {
+                const newPerson = newPersonNameInput.value.trim();
+                if (newPerson && !people.includes(newPerson)) {
+                    people.splice(people.length - 1, 0, newPerson);
+                    newPersonNameInput.value = '';
+                    renderPeopleList();
+                    populateSelect(newPersonSelect, '기타');
+                } else {
+                    alert('이름을 입력하거나 이미 존재하는 이름입니다.');
+                }
+            });
+
+            saveDancesBtn.addEventListener('click', saveDances);
+            savePeopleBtn.addEventListener('click', savePeople);
+        });
+    </script>
+</body>
+</html>
