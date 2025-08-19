@@ -17,7 +17,7 @@
 
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+            background-color: #f4f7f9; /* 부드러운 배경색 */
             display: flex;
             justify-content: center;
             align-items: flex-start; /* 상단 정렬 */
@@ -27,27 +27,18 @@
 
         .container {
             background-color: #fff;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             width: 90%;
             max-width: 600px;
             text-align: center;
             position: relative;
         }
         
-        .logo-container {
-            margin-bottom: 20px;
-        }
-
-        .logo-container img {
-            max-width: 150px;
-            height: auto;
-        }
-        
         h1 {
-            color: #333;
-            margin-bottom: 20px;
+            color: #2c3e50;
+            margin-bottom: 25px;
             font-size: 2.2em;
             font-weight: 700;
         }
@@ -58,44 +49,44 @@
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .filter-btn {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
+            padding: 8px 18px;
+            border: 1px solid #dfe6e9;
             border-radius: 20px;
-            background-color: #f8f9fa;
-            color: #495057;
+            background-color: #fff;
+            color: #576574;
             cursor: pointer;
             font-size: 0.9em;
+            font-weight: 500;
             transition: all 0.2s ease-in-out;
         }
 
         .filter-btn:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
+            background-color: #f1f3f5;
+            border-color: #c8d6e5;
         }
 
         .filter-btn.active {
-            background-color: #007bff;
+            background-color: #34495e;
             color: white;
-            border-color: #007bff;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            border-color: #34495e;
         }
         
         #search-input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 14px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
             font-size: 1em;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-family: 'Noto Sans KR', sans-serif;
             transition: border-color 0.2s;
         }
         #search-input:focus {
-            border-color: #007bff;
+            border-color: #54a0ff;
             outline: none;
         }
 
@@ -125,8 +116,8 @@
 
         #dance-list li {
             background-color: #fff;
-            padding: 15px;
-            margin-bottom: 10px;
+            padding: 18px;
+            margin-bottom: 12px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
@@ -134,24 +125,20 @@
             font-size: 1.1em;
             transition: all 0.2s ease-in-out;
             border: 1px solid #f1f3f5;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         #dance-list li:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.07);
         }
 
         .dance-info { flex-grow: 1; margin-right: 10px; text-align: left; }
-        .dance-info .name { font-weight: 700; color: #343a40; }
-        .dance-info .price { color: #007bff; font-weight: bold; margin-left: 10px; }
+        .dance-info .name { font-weight: 700; color: #2c3e50; }
+        .dance-info .price { color: #576574; font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo-container">
-            <img src="http://googleusercontent.com/file_content/3" alt="771 로고">
-        </div>
-        <h1>771 시그니처 단가</h1>
+        <h1>771 시그니처 리스트</h1>
         
         <div id="filter-buttons">
             <button class="filter-btn active" data-min="0" data-max="Infinity">전체</button>
