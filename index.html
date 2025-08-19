@@ -107,17 +107,18 @@
             z-index: 10;
         }
 
+        #list-header .header-price {
+            font-weight: 700;
+            color: #34495e;
+            flex-basis: 120px; /* 단가 너비 고정 */
+            text-align: left;
+        }
+        
         #list-header .header-name {
             font-weight: 700;
             color: #34495e;
             flex-grow: 1;
             text-align: left;
-        }
-
-        #list-header .header-price {
-            font-weight: 700;
-            color: #34495e;
-            text-align: right;
         }
 
         #dance-list { 
@@ -161,12 +162,23 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.07);
         }
 
-        .dance-info { flex-grow: 1; margin-right: 10px; text-align: left; }
+        .dance-info { 
+            display: flex;
+            align-items: center;
+            flex-grow: 1; 
+            text-align: left; 
+        }
+        .dance-info .price { 
+            color: #576574; 
+            font-weight: bold; 
+            flex-basis: 120px; /* 헤더와 너비 맞춤 */
+            text-align: left;
+        }
         .dance-info .name { 
             font-weight: 700; 
             color: #2980b9; /* 이름 색상 변경 */
+            flex-grow: 1;
         }
-        .dance-info .price { color: #576574; font-weight: bold; margin-left: 10px; text-align: right; }
     </style>
 </head>
 <body>
@@ -185,8 +197,8 @@
         
         <div class="list-container">
             <div id="list-header">
-                <div class="header-name">시그 이름</div>
                 <div class="header-price">단가</div>
+                <div class="header-name">시그 이름</div>
             </div>
             <ul id="dance-list"></ul>
         </div>
@@ -504,14 +516,17 @@
                     const li = document.createElement('li');
                     const danceInfo = document.createElement('div');
                     danceInfo.className = 'dance-info';
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'name';
-                    nameSpan.textContent = dance.name;
+                    
                     const priceSpan = document.createElement('span');
                     priceSpan.className = 'price';
                     priceSpan.textContent = `${dance.price.toLocaleString('ko-KR')}개`;
-                    danceInfo.appendChild(nameSpan);
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'name';
+                    nameSpan.textContent = dance.name;
+                    
                     danceInfo.appendChild(priceSpan);
+                    danceInfo.appendChild(nameSpan);
                     li.appendChild(danceInfo);
                     danceList.appendChild(li);
                 });
