@@ -110,7 +110,7 @@
         #list-header .header-price {
             font-weight: 700;
             color: #34495e;
-            flex-basis: 120px; /* 단가 너비 고정 */
+            flex-basis: 100px; /* 단가 너비 고정 */
             text-align: left;
         }
         
@@ -171,13 +171,38 @@
         .dance-info .price { 
             color: #576574; 
             font-weight: bold; 
-            flex-basis: 120px; /* 헤더와 너비 맞춤 */
+            flex-basis: 100px; /* 헤더와 너비 맞춤 */
             text-align: left;
+            margin-right: 10px;
         }
         .dance-info .name { 
             font-weight: 700; 
             color: #2980b9; /* 이름 색상 변경 */
             flex-grow: 1;
+        }
+
+        /* 모바일 반응형 스타일 */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+            #dance-list li {
+                padding: 12px 15px;
+                font-size: 1em;
+            }
+            #list-header .header-price, .dance-info .price {
+                flex-basis: 80px; /* 모바일에서 단가 너비 축소 */
+            }
         }
     </style>
 </head>
