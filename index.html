@@ -81,7 +81,7 @@
             border: 2px solid #dfe6e9;
             border-radius: 12px;
             font-size: 1em;
-            margin-bottom: 25px;
+            margin-bottom: 15px; /* 간격 조정 */
             font-family: 'Noto Sans KR', sans-serif;
             transition: border-color 0.2s;
         }
@@ -90,12 +90,42 @@
             outline: none;
         }
 
+        /* 리스트 컨테이너 */
+        .list-container {
+            position: relative;
+        }
+
+        /* 고정 헤더 스타일 */
+        #list-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 18px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #list-header .header-name {
+            font-weight: 700;
+            color: #34495e;
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        #list-header .header-price {
+            font-weight: 700;
+            color: #34495e;
+            text-align: right;
+        }
+
         #dance-list { 
             list-style-type: none; 
             text-align: left; 
             max-height: 50vh; /* 화면 높이에 따라 조절 */
             overflow-y: auto;
-            padding-right: 10px; /* 스크롤바 공간 확보 */
+            padding-right: 5px; /* 스크롤바 공간 확보 */
         }
         /* 스크롤바 디자인 */
         #dance-list::-webkit-scrollbar {
@@ -117,7 +147,7 @@
         #dance-list li {
             background-color: #fff;
             padding: 18px;
-            margin-bottom: 12px;
+            margin-top: 12px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
@@ -132,8 +162,11 @@
         }
 
         .dance-info { flex-grow: 1; margin-right: 10px; text-align: left; }
-        .dance-info .name { font-weight: 700; color: #2c3e50; }
-        .dance-info .price { color: #576574; font-weight: bold; margin-left: 10px; }
+        .dance-info .name { 
+            font-weight: 700; 
+            color: #2980b9; /* 이름 색상 변경 */
+        }
+        .dance-info .price { color: #576574; font-weight: bold; margin-left: 10px; text-align: right; }
     </style>
 </head>
 <body>
@@ -150,7 +183,13 @@
         
         <input type="text" id="search-input" placeholder="시그 이름 또는 단가로 검색...">
         
-        <ul id="dance-list"></ul>
+        <div class="list-container">
+            <div id="list-header">
+                <div class="header-name">시그 이름</div>
+                <div class="header-price">단가</div>
+            </div>
+            <ul id="dance-list"></ul>
+        </div>
     </div>
     
     <script>
