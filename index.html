@@ -4,10 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>771 시그니처 리스트</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         /* Google Fonts에서 'Noto Sans KR' 폰트 가져오기 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-color: #f4f7f9;
+            --container-bg: #ffffff;
+            --text-color: #2c3e50;
+            --subtext-color: #576574;
+            --border-color: #dfe6e9;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --header-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --card-border: #f1f3f5;
+            --card-shadow: rgba(0,0,0,0.05);
+            --card-hover-shadow: rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --container-bg: #2c2c2c;
+            --text-color: #ecf0f1;
+            --subtext-color: #bdc3c7;
+            --border-color: #4a4a4a;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --header-bg: #3a3a3a;
+            --card-bg: #333333;
+            --card-border: #4a4a4a;
+            --card-shadow: rgba(0,0,0,0.2);
+            --card-hover-shadow: rgba(0,0,0,0.3);
+        }
 
         * {
             box-sizing: border-box;
@@ -17,27 +46,95 @@
 
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f4f7f9; /* 부드러운 배경색 */
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: flex-start; /* 상단 정렬 */
             min-height: 100vh;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            background-color: #fff;
+            background-color: var(--container-bg);
             padding: 40px;
             border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 40px var(--shadow-color);
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             text-align: center;
             position: relative;
+            transition: background-color 0.3s;
         }
         
+        .top-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 다크모드 토글 스위치 */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 44px;
+        }
+        .theme-switch input {
+            display:none;
+        }
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 4px;
+            content: "";
+            height: 16px;
+            left: 4px;
+            position: absolute;
+            transition: .4s;
+            width: 16px;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* 뷰 전환 버튼 */
+        #view-toggle {
+            background: none;
+            border: none;
+            color: var(--subtext-color);
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
         h1 {
-            color: #2c3e50;
+            color: var(--text-color);
             margin-bottom: 25px;
             font-size: 2.2em;
             font-weight: 700;
@@ -50,28 +147,27 @@
             margin-bottom: 25px;
         }
 
-        /* 필터 및 정렬 버튼 스타일 */
-        #filter-buttons, #sort-buttons {
+        #filter-buttons {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
         }
 
-        .filter-btn, .sort-btn {
+        .filter-btn {
             padding: 8px 18px;
-            border: 1px solid #dfe6e9;
+            border: 1px solid var(--border-color);
             border-radius: 20px;
-            background-color: #fff;
-            color: #576574;
+            background-color: var(--container-bg);
+            color: var(--subtext-color);
             cursor: pointer;
             font-size: 0.9em;
             font-weight: 500;
             transition: all 0.2s ease-in-out;
         }
 
-        .filter-btn:hover, .sort-btn:hover {
-            background-color: #f1f3f5;
+        .filter-btn:hover {
+            background-color: var(--bg-color);
             border-color: #c8d6e5;
         }
 
@@ -79,12 +175,6 @@
             background-color: #34495e;
             color: white;
             border-color: #34495e;
-        }
-        
-        .sort-btn.active {
-            background-color: #27ae60;
-            color: white;
-            border-color: #27ae60;
         }
         
         .search-wrapper {
@@ -95,59 +185,29 @@
         #search-input {
             width: 100%;
             padding: 14px;
-            border: 2px solid #dfe6e9;
+            border: 2px solid var(--border-color);
             border-radius: 12px;
             font-size: 1em;
             font-family: 'Noto Sans KR', sans-serif;
             transition: border-color 0.2s;
+            background-color: var(--bg-color);
+            color: var(--text-color);
         }
         #search-input:focus {
             border-color: #54a0ff;
             outline: none;
         }
 
-        /* 자동완성 목록 스타일 */
-        .autocomplete-items {
-            position: absolute;
-            border: 1px solid #d4d4d4;
-            border-bottom: none;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            border-radius: 0 0 12px 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-        .autocomplete-items div {
-            padding: 12px;
-            cursor: pointer;
-            background-color: #fff; 
-            border-bottom: 1px solid #e9e9e9; 
-            text-align: left;
-        }
-        .autocomplete-items div:last-child {
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-        }
-        .autocomplete-items div:hover {
-            background-color: #f1f3f5; 
-        }
-
-        /* 리스트 컨테이너 */
         .list-container {
             position: relative;
         }
 
-        /* 고정 헤더 스타일 */
         #list-header {
             display: flex;
             justify-content: space-between;
             padding: 10px 18px;
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
+            background-color: var(--header-bg);
+            border-bottom: 2px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -155,8 +215,8 @@
 
         #list-header .header-price {
             font-weight: 700;
-            color: #34495e;
-            flex-basis: 100px; /* 단가 너비 고정 */
+            color: var(--text-color);
+            flex-basis: 100px;
             text-align: left;
             cursor: pointer;
             user-select: none;
@@ -164,7 +224,7 @@
         
         #list-header .header-name {
             font-weight: 700;
-            color: #34495e;
+            color: var(--text-color);
             flex-grow: 1;
             text-align: left;
         }
@@ -172,32 +232,42 @@
         #dance-list { 
             list-style-type: none; 
             text-align: left; 
-            max-height: 50vh; /* 화면 높이에 따라 조절 */
+            max-height: 55vh;
             overflow-y: auto;
-            padding-right: 5px; /* 스크롤바 공간 확보 */
+            padding: 5px;
         }
         /* 스크롤바 디자인 */
-        #dance-list::-webkit-scrollbar { width: 8px; }
-        #dance-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        #dance-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-        #dance-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        #dance-list::-webkit-scrollbar { 
+            width: 14px; 
+        }
+        #dance-list::-webkit-scrollbar-track { 
+            background: transparent; 
+        }
+        #dance-list::-webkit-scrollbar-thumb { 
+            background: #bdc3c7; 
+            border-radius: 10px;
+            border: 4px solid var(--container-bg);
+        }
+        #dance-list::-webkit-scrollbar-thumb:hover { 
+            background: #95a5a6; 
+        }
 
 
         #dance-list li {
-            background-color: #fff;
-            padding: 14px 18px; /* 상하 여백 줄임 */
-            margin-top: 8px; /* 아이템 간 간격 줄임 */
+            background-color: var(--card-bg);
+            padding: 14px 18px;
+            margin-top: 8px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1.1em;
             transition: all 0.2s ease-in-out;
-            border: 1px solid #f1f3f5;
+            border: 1px solid var(--card-border);
         }
         #dance-list li:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 15px var(--card-hover-shadow);
         }
 
         .dance-info { 
@@ -207,43 +277,88 @@
             text-align: left; 
         }
         .dance-info .price { 
-            color: #576574; 
             font-weight: bold; 
-            flex-basis: 100px; /* 헤더와 너비 맞춤 */
+            flex-basis: 100px;
             text-align: left;
             margin-right: 10px;
         }
         .dance-info .name { 
             font-weight: 700; 
-            color: #2980b9; /* 이름 색상 변경 */
+            color: var(--text-color); /* 이름 색상 변경 */
             flex-grow: 1;
         }
 
+        /* 가격대별 색상 */
+        .price-tier-1 .price { color: #27ae60; } /* ~999 */
+        .price-tier-2 .price { color: #2980b9; } /* 1000 ~ 4999 */
+        .price-tier-3 .price { color: #d35400; } /* 5000 ~ 9999 */
+        .price-tier-4 .price { color: #c0392b; } /* 10000 ~ */
+        .price-tier-5 .price { color: #8e44ad; } /* 100000 ~ */
+
+        /* 카드 뷰 스타일 */
+        #dance-list.card-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 카드 너비 축소 */
+            gap: 15px;
+        }
+        #dance-list.card-view li {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 15px; /* 카드 내부 여백 조정 */
+        }
+        #dance-list.card-view .dance-info {
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+        #dance-list.card-view .dance-info .price {
+            font-size: 1.1em; /* 카드 내부 폰트 크기 조정 */
+            margin-bottom: 5px;
+        }
+        #dance-list.card-view .dance-info .name {
+            font-size: 0.9em; /* 카드 내부 폰트 크기 조정 */
+        }
+        #dance-list.card-view + #item-count {
+            margin-top: 10px;
+        }
+        #dance-list.card-view ~ #list-header {
+            display: none;
+        }
+
+
         #item-count {
             margin-top: 20px;
-            color: #576574;
+            color: var(--subtext-color);
             font-size: 0.9em;
             text-align: right;
         }
 
-        /* 모바일 반응형 스타일 */
         @media (max-width: 600px) {
             body { padding: 10px; }
             .container { padding: 20px; }
             h1 { font-size: 1.8em; }
-            .filter-btn, .sort-btn { padding: 6px 12px; font-size: 0.8em; }
-            #dance-list li { 
-                padding: 10px 15px; /* 모바일 상하 여백 줄임 */
-                font-size: 1em; 
-            }
+            .filter-btn { padding: 6px 12px; font-size: 0.8em; }
+            #dance-list li { padding: 10px 15px; font-size: 1em; }
             #list-header .header-price, .dance-info .price {
-                flex-basis: 80px; /* 모바일에서 단가 너비 축소 */
+                flex-basis: 80px;
+            }
+            #dance-list.card-view {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* 모바일 카드 너비 */
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="top-controls">
+            <button id="view-toggle" title="보기 전환"><i class="fas fa-list"></i></button>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider round"></div>
+                </label>
+            </div>
+        </div>
         <h1>771 시그니처 리스트</h1>
         
         <div class="controls-container">
@@ -258,7 +373,6 @@
         
         <div class="search-wrapper">
             <input type="text" id="search-input" placeholder="시그 이름 또는 단가로 검색...">
-            <div id="autocomplete-list" class="autocomplete-items"></div>
         </div>
         
         <div class="list-container">
@@ -279,6 +393,8 @@
             const sortHeader = document.getElementById('sort-header');
             const sortIndicator = document.getElementById('sort-indicator');
             const itemCountElement = document.getElementById('item-count');
+            const themeSwitch = document.getElementById('checkbox');
+            const viewToggle = document.getElementById('view-toggle');
             
             let currentPriceFilter = { min: 0, max: Infinity };
             let currentSort = 'none'; // 'none', 'asc', 'desc'
@@ -294,6 +410,20 @@
                 danceList.innerHTML = '';
                 dancesToRender.forEach((dance) => {
                     const li = document.createElement('li');
+                    
+                    // 가격대별 클래스 추가
+                    if (dance.price >= 100000) {
+                        li.classList.add('price-tier-5');
+                    } else if (dance.price >= 10000) {
+                        li.classList.add('price-tier-4');
+                    } else if (dance.price >= 5000) {
+                        li.classList.add('price-tier-3');
+                    } else if (dance.price >= 1000) {
+                        li.classList.add('price-tier-2');
+                    } else {
+                        li.classList.add('price-tier-1');
+                    }
+
                     const danceInfo = document.createElement('div');
                     danceInfo.className = 'dance-info';
                     
@@ -318,12 +448,10 @@
             const filterAndRender = () => {
                 const searchTerm = searchInput.value.trim().toLowerCase();
                 
-                // 1. 가격 범위로 필터링
                 let filteredDances = dances.filter(dance => 
                     dance.price >= currentPriceFilter.min && dance.price <= currentPriceFilter.max
                 );
 
-                // 2. 검색어로 추가 필터링
                 if (searchTerm) {
                     filteredDances = filteredDances.filter(dance => {
                         const nameMatch = dance.name.toLowerCase().includes(searchTerm);
@@ -332,14 +460,11 @@
                     });
                 }
                 
-                // 3. 정렬 적용
                 if (currentSort === 'asc') {
                     filteredDances.sort((a, b) => a.price - b.price);
                 } else if (currentSort === 'desc') {
                     filteredDances.sort((a, b) => b.price - a.price);
                 } else {
-                    // 정렬이 'none'일 때 원본 순서와 유사하게 유지하기 위해
-                    // 현재 필터링된 배열을 원본 배열 순서에 따라 재정렬
                     const originalOrderMap = new Map(originalDances.map((dance, index) => [dance.name + dance.price, index]));
                     filteredDances.sort((a, b) => originalOrderMap.get(a.name + a.price) - originalOrderMap.get(b.name + b.price));
                 }
@@ -373,65 +498,40 @@
                 filterAndRender();
             });
 
-            // 검색 입력 이벤트 (자동완성)
-            searchInput.addEventListener('input', function(e) {
-                const val = this.value.trim().toLowerCase();
-                filterAndRender(); // 입력할 때마다 실시간으로 목록 필터링
-                closeAllLists();
-                if (!val) { 
-                    return false;
-                }
-                
-                const suggestions = dances
-                    .filter(dance => dance.name.toLowerCase().includes(val))
-                    .sort((a, b) => { // 연관성 높은 순으로 정렬
-                        const aName = a.name.toLowerCase();
-                        const bName = b.name.toLowerCase();
-                        const aStartsWith = aName.startsWith(val);
-                        const bStartsWith = bName.startsWith(val);
-                        if (aStartsWith && !bStartsWith) return -1;
-                        if (!aStartsWith && bStartsWith) return 1;
-                        return aName.localeCompare(bName);
-                    });
-                
-                const list = document.createElement('div');
-                list.setAttribute('id', this.id + 'autocomplete-list');
-                list.setAttribute('class', 'autocomplete-items');
-                this.parentNode.appendChild(list);
-
-                suggestions.slice(0, 5).forEach(dance => { // 최대 5개 제안
-                    const item = document.createElement('div');
-                    const regex = new RegExp(`(${val})`, 'gi');
-                    item.innerHTML = dance.name.replace(regex, '<strong>$1</strong>');
-                    
-                    item.addEventListener('click', function(e) {
-                        searchInput.value = dance.name;
-                        closeAllLists();
-                        filterAndRender();
-                    });
-                    list.appendChild(item);
-                });
-            });
-
-            // 엔터 키를 누르면 자동완성 목록 닫기
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    closeAllLists();
+            // 검색 입력 이벤트
+            searchInput.addEventListener('input', filterAndRender);
+            
+            // 테마 전환
+            themeSwitch.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
                 }
             });
 
-            function closeAllLists(elmnt) {
-                const items = document.getElementsByClassName('autocomplete-items');
-                for (let i = 0; i < items.length; i++) {
-                    if (elmnt != items[i] && elmnt != searchInput) {
-                        items[i].parentNode.removeChild(items[i]);
-                    }
-                }
+            // 뷰 전환
+            viewToggle.addEventListener('click', () => {
+                danceList.classList.toggle('card-view');
+                const isCardView = danceList.classList.contains('card-view');
+                viewToggle.innerHTML = isCardView ? '<i class="fas fa-th-large"></i>' : '<i class="fas fa-list"></i>';
+                localStorage.setItem('view', isCardView ? 'card' : 'list');
+            });
+
+            // 저장된 설정 불러오기
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeSwitch.checked = true;
+            }
+            const savedView = localStorage.getItem('view');
+            if (savedView === 'card') {
+                danceList.classList.add('card-view');
+                viewToggle.innerHTML = '<i class="fas fa-th-large"></i>';
             }
 
-            document.addEventListener('click', function (e) {
-                closeAllLists(e.target);
-            });
 
             // 초기 렌더링
             filterAndRender();
