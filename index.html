@@ -219,6 +219,13 @@
             flex-grow: 1;
         }
 
+        #item-count {
+            margin-top: 20px;
+            color: #576574;
+            font-size: 0.9em;
+            text-align: right;
+        }
+
         /* 모바일 반응형 스타일 */
         @media (max-width: 600px) {
             body { padding: 10px; }
@@ -258,6 +265,7 @@
             </div>
             <ul id="dance-list"></ul>
         </div>
+        <div id="item-count"></div>
     </div>
     
     <script>
@@ -267,6 +275,7 @@
             const filterButtonsContainer = document.getElementById('filter-buttons');
             const sortHeader = document.getElementById('sort-header');
             const sortIndicator = document.getElementById('sort-indicator');
+            const itemCountElement = document.getElementById('item-count');
             
             let currentPriceFilter = { min: 0, max: Infinity };
             let currentSort = 'none'; // 'none', 'asc', 'desc'
@@ -298,6 +307,8 @@
                     li.appendChild(danceInfo);
                     danceList.appendChild(li);
                 });
+                // 아이템 개수 업데이트
+                itemCountElement.textContent = `총 ${dancesToRender.length}개의 시그가 있습니다.`;
             };
 
             // 검색 및 필터링, 정렬 함수
@@ -397,6 +408,13 @@
                     });
                     list.appendChild(item);
                 });
+            });
+
+            // 엔터 키를 누르면 자동완성 목록 닫기
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    closeAllLists();
+                }
             });
 
             function closeAllLists(elmnt) {
