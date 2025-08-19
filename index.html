@@ -22,9 +22,9 @@
             background-color: #f8f9fa;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* 상단 정렬 */
             min-height: 100vh;
-            padding: 20px 0;
+            padding: 20px;
         }
 
         .container {
@@ -33,28 +33,11 @@
             border-radius: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 90%;
-            max-width: 600px; /* 컨테이너 최대 너비 확장 */
+            max-width: 600px;
             text-align: center;
             position: relative;
         }
         
-        #admin-mode-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8em;
-            display: none; /* 관리자 버튼 기본 숨김 */
-        }
-        #admin-mode-btn:hover {
-            background: #5a6268;
-        }
-
         h1 {
             color: #333;
             margin-bottom: 20px;
@@ -62,39 +45,35 @@
             font-weight: 700;
         }
 
-        .input-group {
+        /* 필터 버튼 스타일 */
+        #filter-buttons {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .admin-controls {
-            display: none; /* 관리자 기능 기본 숨김 */
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            justify-content: center;
             margin-bottom: 20px;
         }
 
-        .input-field {
-            flex-grow: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            font-family: 'Noto Sans KR', sans-serif;
+        .filter-btn {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background-color: #f8f9fa;
+            color: #495057;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        #add-btn {
-            padding: 12px;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2em;
-            flex-shrink: 0;
-            background-color: #007bff;
+        .filter-btn:hover {
+            background-color: #e9ecef;
         }
-        #add-btn:hover { background-color: #0056b3; }
+
+        .filter-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
         
         #search-input {
             width: 100%;
@@ -106,7 +85,12 @@
             font-family: 'Noto Sans KR', sans-serif;
         }
 
-        #dance-list { list-style-type: none; text-align: left; max-height: 400px; overflow-y: auto; }
+        #dance-list { 
+            list-style-type: none; 
+            text-align: left; 
+            max-height: 50vh; /* 화면 높이에 따라 조절 */
+            overflow-y: auto; 
+        }
 
         #dance-list li {
             background-color: #f1f3f5;
@@ -123,94 +107,34 @@
         .dance-info { flex-grow: 1; margin-right: 10px; text-align: left; }
         .dance-info .name { font-weight: 700; color: #343a40; }
         .dance-info .price { color: #868e96; margin-left: 10px; }
-        .button-group { display: flex; gap: 5px; }
-
-        .edit-btn, .delete-btn {
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            display: none;
-        }
-        
-        .edit-btn { background-color: #17a2b8; }
-        .edit-btn:hover { background-color: #138496; }
-        .delete-btn { background-color: #dc3545; }
-        .delete-btn:hover { background-color: #c82333; }
-
-        #password-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .modal-content h2 { margin-bottom: 15px; }
-        #password-input { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-right: 10px; }
-        #submit-password-btn { padding: 10px 15px; border-radius: 5px; border: none; background-color: #007bff; color: white; cursor: pointer; }
-        #message-area { color: red; height: 20px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <button id="admin-mode-btn">관리자 모드</button>
         <h1>771 시그니처 단가</h1>
         
-        <div id="admin-controls" class="admin-controls">
-            <div class="input-group">
-                <input type="text" id="dance-name-input" class="input-field" placeholder="시그 이름">
-                <input type="number" id="dance-price-input" class="input-field" placeholder="단가 (개수)">
-                <button id="add-btn"><i class="fas fa-plus"></i></button>
-            </div>
+        <div id="filter-buttons">
+            <button class="filter-btn active" data-min="0" data-max="Infinity">전체</button>
+            <button class="filter-btn" data-min="1" data-max="999">~ 999</button>
+            <button class="filter-btn" data-min="1001" data-max="4999">1001 ~ 4999</button>
+            <button class="filter-btn" data-min="5000" data-max="9999">5000 ~ 9999</button>
+            <button class="filter-btn" data-min="10000" data-max="Infinity">10000 ~</button>
         </div>
         
         <input type="text" id="search-input" placeholder="시그 이름 또는 단가로 검색...">
         
         <ul id="dance-list"></ul>
     </div>
-
-    <div id="password-modal">
-        <div class="modal-content">
-            <h2>관리자 비밀번호</h2>
-            <input type="password" id="password-input" placeholder="비밀번호 입력">
-            <button id="submit-password-btn">확인</button>
-            <p id="message-area"></p>
-        </div>
-    </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // DOM 요소 가져오기
-            const nameInput = document.getElementById('dance-name-input');
-            const priceInput = document.getElementById('dance-price-input');
-            const addBtn = document.getElementById('add-btn');
             const searchInput = document.getElementById('search-input');
             const danceList = document.getElementById('dance-list');
-            const adminModeBtn = document.getElementById('admin-mode-btn');
-            const adminControls = document.getElementById('admin-controls');
-            const passwordModal = document.getElementById('password-modal');
-            const passwordInput = document.getElementById('password-input');
-            const submitPasswordBtn = document.getElementById('submit-password-btn');
-            const messageArea = document.getElementById('message-area');
+            const filterButtonsContainer = document.getElementById('filter-buttons');
 
-            // 상수 및 상태 변수
-            const ADMIN_PASSWORD = '1234';
-            const ADMIN_TRIGGER_CODE = '771771';
-            let isAdmin = false;
+            let currentPriceFilter = { min: 0, max: Infinity };
 
-            // 데이터 배열
+            // 데이터 배열: 여기서 직접 목록을 수정, 추가, 삭제하시면 됩니다.
             let dances = [
                 { name: '함사울래', price: 771 },
                 { name: '햄토리', price: 852 },
@@ -508,11 +432,9 @@
             ];
 
             // 목록 렌더링 함수
-            const renderDances = (filteredDances) => {
+            const renderDances = (dancesToRender) => {
                 danceList.innerHTML = '';
-                const dancesToRender = filteredDances || dances;
-
-                dancesToRender.forEach((dance, index) => {
+                dancesToRender.forEach((dance) => {
                     const li = document.createElement('li');
                     const danceInfo = document.createElement('div');
                     danceInfo.className = 'dance-info';
@@ -524,158 +446,53 @@
                     priceSpan.textContent = `${dance.price.toLocaleString('ko-KR')}개`;
                     danceInfo.appendChild(nameSpan);
                     danceInfo.appendChild(priceSpan);
-
-                    const buttonGroup = document.createElement('div');
-                    buttonGroup.className = 'button-group';
-                    const editBtn = document.createElement('button');
-                    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-                    editBtn.className = 'edit-btn';
-                    editBtn.addEventListener('click', () => handleEdit(li, dance, index));
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                    deleteBtn.className = 'delete-btn';
-                    deleteBtn.addEventListener('click', () => {
-                        dances.splice(index, 1);
-                        filterDances();
-                    });
-
-                    buttonGroup.appendChild(editBtn);
-                    buttonGroup.appendChild(deleteBtn);
-
-                    if (isAdmin) {
-                        editBtn.style.display = 'inline-block';
-                        deleteBtn.style.display = 'inline-block';
-                    }
-
                     li.appendChild(danceInfo);
-                    li.appendChild(buttonGroup);
                     danceList.appendChild(li);
                 });
             };
-            
-            // 수정 핸들러 함수
-            const handleEdit = (li, dance, index) => {
-                li.innerHTML = '';
-                li.style.backgroundColor = '#e9ecef';
-                const editNameInput = document.createElement('input');
-                editNameInput.type = 'text';
-                editNameInput.className = 'input-field';
-                editNameInput.value = dance.name;
-                const editPriceInput = document.createElement('input');
-                editPriceInput.type = 'number';
-                editPriceInput.className = 'input-field';
-                editPriceInput.value = dance.price;
-                const saveBtn = document.createElement('button');
-                saveBtn.innerHTML = '<i class="fas fa-check"></i>';
-                saveBtn.className = 'edit-btn';
-                saveBtn.style.display = 'inline-block';
-                saveBtn.onclick = () => {
-                    const newName = editNameInput.value.trim();
-                    const newPrice = parseInt(editPriceInput.value, 10);
-                    if (newName && !isNaN(newPrice) && newPrice > 0) {
-                        dances[index] = { name: newName, price: newPrice };
-                        filterDances();
-                    }
-                };
-                const cancelBtn = document.createElement('button');
-                cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
-                cancelBtn.className = 'delete-btn';
-                cancelBtn.style.display = 'inline-block';
-                cancelBtn.onclick = () => filterDances();
-                const buttonGroup = document.createElement('div');
-                buttonGroup.className = 'button-group';
-                buttonGroup.appendChild(saveBtn);
-                buttonGroup.appendChild(cancelBtn);
-                li.appendChild(editNameInput);
-                li.appendChild(editPriceInput);
-                li.appendChild(buttonGroup);
-            };
 
-            // 추가 함수
-            const addDance = () => {
-                const name = nameInput.value.trim();
-                const price = parseInt(priceInput.value, 10);
-                if (name && !isNaN(price) && price > 0) {
-                    dances.push({ name, price });
-                    nameInput.value = '';
-                    priceInput.value = '';
-                    nameInput.focus();
-                    filterDances();
-                } else {
-                    alert('올바른 시그 이름과 단가를 입력해주세요.');
-                }
-            };
+            // 검색 및 필터링 함수
+            const filterAndRender = () => {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                // 1. 가격 범위로 필터링
+                const priceFiltered = dances.filter(dance => 
+                    dance.price >= currentPriceFilter.min && dance.price <= currentPriceFilter.max
+                );
 
-            // 검색 필터링 함수
-            const filterDances = () => {
-                const searchTerm = searchInput.value.trim();
-                if (searchTerm === ADMIN_TRIGGER_CODE) {
-                    adminModeBtn.style.display = 'block';
-                } else {
-                    if (!isAdmin) adminModeBtn.style.display = 'none';
-                }
-                const lowerCaseSearchTerm = searchTerm.toLowerCase();
-                const filtered = dances.filter(dance => {
-                    const nameMatch = dance.name.toLowerCase().includes(lowerCaseSearchTerm);
+                // 2. 검색어로 추가 필터링
+                const finalFiltered = priceFiltered.filter(dance => {
+                    const nameMatch = dance.name.toLowerCase().includes(searchTerm);
                     const priceMatch = String(dance.price).includes(searchTerm);
                     return nameMatch || priceMatch;
                 });
-                renderDances(filtered);
+
+                renderDances(finalFiltered);
             };
             
-            // 관리자 모드 토글 함수
-            const toggleAdminMode = (enable) => {
-                isAdmin = enable;
-                adminControls.style.display = enable ? 'block' : 'none';
-                adminModeBtn.textContent = enable ? '모드 해제' : '관리자 모드';
-                filterDances();
-            };
-            
-            // 이벤트 리스너 연결
-            adminModeBtn.addEventListener('click', () => {
-                if (isAdmin) {
-                    toggleAdminMode(false);
-                } else {
-                    passwordModal.style.display = 'flex';
-                    passwordInput.focus();
+            // 필터 버튼 클릭 이벤트
+            filterButtonsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-btn')) {
+                    // 모든 버튼에서 'active' 클래스 제거
+                    filterButtonsContainer.querySelectorAll('.filter-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // 클릭된 버튼에 'active' 클래스 추가
+                    e.target.classList.add('active');
+
+                    // 필터 범위 업데이트
+                    currentPriceFilter.min = parseFloat(e.target.dataset.min);
+                    currentPriceFilter.max = parseFloat(e.target.dataset.max);
+                    
+                    filterAndRender();
                 }
             });
 
-            submitPasswordBtn.addEventListener('click', () => {
-                if (passwordInput.value === ADMIN_PASSWORD) {
-                    toggleAdminMode(true);
-                    passwordModal.style.display = 'none';
-                    passwordInput.value = '';
-                    messageArea.textContent = '';
-                } else {
-                    messageArea.textContent = '비밀번호가 틀렸습니다.';
-                    passwordInput.value = '';
-                }
-            });
-
-            passwordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') submitPasswordBtn.click();
-            });
-            
-            passwordModal.addEventListener('click', (e) => {
-                if (e.target === passwordModal) {
-                    passwordModal.style.display = 'none';
-                    messageArea.textContent = '';
-                }
-            });
-
-            addBtn.addEventListener('click', addDance);
-            searchInput.addEventListener('input', filterDances);
-            
-            priceInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addDance();
-            });
-            nameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addDance();
-            });
+            // 검색 입력 이벤트
+            searchInput.addEventListener('input', filterAndRender);
 
             // 초기 렌더링
-            renderDances();
+            filterAndRender();
         });
     </script>
 </body>
